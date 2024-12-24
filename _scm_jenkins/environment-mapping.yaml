@@ -1,0 +1,8 @@
+- branchNamePattern: '(feature|bugfix)/.*'
+  environment: 'PREDEV'
+- branchNamePattern: '(develop|hotfix/.*)'
+  environment: 'DEV'
+- jobNamePattern: '.*deploy-qa'
+  environment: 'QA'
+- jobNamePattern: '.*deploy-prod'
+  environment: 'PROD'

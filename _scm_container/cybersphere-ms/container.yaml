@@ -1,0 +1,54 @@
+# Sets the name of the docker image to be build from the Dockerfile or pulled from the internet - If no Dockerfile is present the pipeline will attempt to pull from the internet
+name: cybersphere-ms
+ 
+# Desired tags of image - If no Dockerfile is present the pipeline will attempt to pull each tag from the internet
+tagStrategies:
+  predev:
+    branches:
+      - feature/*
+      - bugfix/*
+      - hotfix/*
+    tags:
+      - ${Major}.${Minor}.${Patch}-alpha.${CommitsSinceVersionSource}.${PreReleaseLabel}
+  dev:
+    branches:
+      - develop
+    tags:
+      - ${Major}.${Minor}.${Patch}-beta.${CommitsSinceVersionSource}
+  prerelease:
+    tags:
+      - ${Major}.${Minor}.${Patch}-${PreReleaseTag}
+  release:
+    tags:
+      - ${Major}.${Minor}.${Patch}
+      - ${Major}.${Minor}
+      - ${Major}
+      - latest
+ 
+# Whether or not to build with the --no-cache flag on the docker build command (Defaults to true)
+useDockerCache: true
+ 
+# Whether to override the image source. If true it will allow an upload from any repo regardless of where the image was originally uploaded from.
+overrideImageSource: false
+
+environmentVariables:
+  - type: credentials
+    credentialsId: artifactory
+    usernameVariable: JNJ_NODE_REPO_USERNAME
+    passwordVariable: JNJ_NODE_REPO_PASSWORD
+ 
+buildArgs:
+  - JNJ_NODE_REPO_USERNAME=${JNJ_NODE_REPO_USERNAME}
+  - JNJ_NODE_REPO_PASSWORD=${JNJ_NODE_REPO_PASSWORD}
+  - JNJ_NODE_REPO_EMAIL=rjha25@its.jnj.com
+  
+######   Additional Parameters   ######
+# Define how Docker Image pipeline should process this image. Default value - false. Supported values
+# true - build and uploaded to Artifactory
+# false - skip the build and upload to Artifactory. If image was previously uploaded it will not be changed.
+# delete - delete the image versions defined in this container.yaml
+build: true
+ 
+# Required for ASx projects only. Should map with the associated Artifactory Repository of your Docker Registry given by the EAT team.
+# For a Docker Registry that is accessed as taaa-docker.artifactrepo.jnj.com, this should be taaa-docker
+artifactoryRepository: jhsu-docker

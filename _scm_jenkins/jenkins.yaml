@@ -1,0 +1,44 @@
+- url: https://jenkins.eat.jnj.com/jhsu-dev/
+  # Job Creation details
+  createJobsFrom:            # branches to create jenkins job from
+      - feature/*
+      - develop
+      - release
+      - master
+      - qa
+      - main
+  createJobsIncludeAuthors:  # create jobs for all users making commits to the repo
+      - .*
+  createJobsIgnoreAuthors:   # ignore creation of Jobs triggered by service account
+      - sa-.*
+  createJobsIncludeCommits:
+      - .*
+  createJobsIgnoreCommits: []
+
+  # Job Trigger details
+  triggerJobsFrom:           ## branches where jenkins job build is triggered when a change is detected
+      - feature/.*
+      - bugfix/.*
+      - hotfix/.*
+      - develop
+  triggerJobsIncludeAuthors:
+      - .*
+  triggerJobsIgnoreAuthors:
+      - sa-.*
+  triggerJobsIncludeCommits:
+      - .*
+
+  # Job Configuration Details
+  jobs:                      # list of job definitions
+      - jobStyle: multi-branch-pipeline
+        jobName: cybersphere-logic/development-pipelines # job path/jobName
+        jobCredentials: sourcecode-bitbucket    # credentials used for cloning source code repo
+        includeBranches:     # list of branches where to trigger job from
+        - feature/*
+        - bugfix/*
+        - hotfix/*
+        - develop
+      - jobStyle: dsl
+        dslIncludes:
+          - _scm_jenkins/jobs/deploy_qa
+          - _scm_jenkins/jobs/deploy_prod

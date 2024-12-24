@@ -1,0 +1,135 @@
+# predev values for iasphere.
+# This is a YAML-formatted file. 
+# Declare variables to be passed into your templates.
+# This is to override the chart name.
+nameOverride: ""
+fullnameOverride: ""
+
+## environmental variables to pods (name and value)
+envVariables: 
+  - name: ALLOWED_ORIGIN
+    value: "http://localhost:3000,http://localhost:3003,https://awsbvxnval0002.jnj.com:20105,https://predev.cybersphere.apps.jnj.com/"
+  - name: port
+    value: "3001"
+  - name: NODE_ENV
+    value: "predev"
+  - name: DATABASE
+    value: "b5g7cybR2a9u1sh3a4n6x0p8w0cs"
+  - name: DISCOVERY_DATABASE
+    value: "discovery"
+  - name: MONGO_KEY
+    value: "mongo-dev-ca.pem"
+  - name: AWS_REGION
+    value: "us-east-1"
+  - name: NODE_TLS_REJECT_UNAUTHORIZED
+    value: "0"
+  - name: PASSPHRASE
+    value: "XQ8LK3H7PTWY2MFNS9VC"
+  - name: SERVICENOW_BASE_URL
+    value: https://jnjirisqa.service-now.com
+  - name: RUST_API_USERNAME
+    value: "rise-agent-user"
+  - name: AGENT_API_PASSWORD
+    value: "PREDEV-CYBSP-RUST-APP-PASSWD"
+  - name: MONGO_CONNECTION_URL
+    value: "PREDEV-CYBSP-DB-CONN-URL"
+  - name: MONGO_TLS_PEM_FILE
+    value: "PREDEV-CYBSP-MONGO-TLS-PEM-FILE"    
+  - name: SERVICENOW_USERNAME
+    value: "iris_rise"
+  - name: SERVICENOW_PASSWORD
+    value: "PREDEV-CYBSP-SERVICENOW-PASSWD"
+  - name: CLI_LOG_KEY
+    value: "PREDEV-CYBSP-CLI-LOG-KEY"
+  - name: CLI_INDEX
+    value: "b5g7cybr2a9c1l2i3n6x0p8w0"
+  - name: OPN_ERR_INDEX
+    value: "b5g7cybr2a9e1r2r3n6x0p8w0"
+  - name: APPLICATION_INDEX
+    value: "b5g7cybr2a9a1p2p3n6x0p8w0"
+  - name: OPENSEARCH_URL
+    value: "https://vpc-itx-eez-iasp-opensearch-dev-aizklcrxi46tgu2xfvs34bphle.us-east-1.es.amazonaws.com/"
+  - name: OPENSEARCH_USER
+    value: "opensearchdb-dev"
+  - name: OPENSEARCH_PASSWORD
+    value: "NON-PROD-CYBSP-OPENSEARCH-PASSWD"
+  - name: AWS_REGION
+    value: "us-east-1"
+  - name: AWS_S3_ACCESS_KEY_ID
+    value: "PREDEV-CYBSP-AWS-ACCESS-KEY-ID"
+  - name: AWS_S3_SECRET_ACCESS_KEY
+    value: "PREDEV-CYBSP-AWS-SECRET-ACCESS-KEY"
+  - name: AWS_BUCKET_NAME
+    value: "cybersphere"
+  - name: MSAL_CLIENT_ID
+    value: "NON-PROD-CYBSP-MSAL-CLIENT-ID"
+  - name: MSAL_TENANT_ID
+    value: "NON-PROD-CYBSP-MSAL-TENANT-ID"
+   
+
+#This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# This is for setting Kubernetes Annotations to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ 
+podAnnotations: {}
+# This is for setting Kubernetes Labels to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# # This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+# service:
+#   # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+#   type: ClusterIP
+#   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
+#   port: 80
+
+# container:
+#   name: http
+#   port: 80
+
+# This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
+ingress:
+  enabled: true
+  hosts:
+    - host: predev.cybersphere.apps.jnj.com
+      paths:
+        - path: /backend/(.*)
+          pathType: ImplementationSpecific
+  tls:
+   - secretName: cybersphere-predev-tls
+     hosts:
+       - predev.cybersphere.apps.jnj.com
+
+# resources:
+#   # We usually recommend not to specify default resources and to leave this as a conscious
+#   # choice for the user. This also increases chances charts run on environments with little
+#   # resources, such as Minikube. If you do want to specify resources, uncomment the following
+#   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+#   requests:
+#     memory: "300Mi"
+#     cpu: "100m"
+#   limits:
+#     memory: "1024Mi"
+#     cpu: "200m"
+  

@@ -1,0 +1,6 @@
+{
+    "sonarlint.connectedMode.project": {
+        "projectKey": "asx-jelc-iga-logic"
+    },
+    "sonarlint.disableTelemetry": true,
+}

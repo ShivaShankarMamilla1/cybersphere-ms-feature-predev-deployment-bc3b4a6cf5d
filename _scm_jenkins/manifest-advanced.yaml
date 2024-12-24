@@ -1,0 +1,299 @@
+# Pipeline details across environments (defaults)
+common:
+  pipelineType: app-dev
+  debug: true
+  # jobSettings:
+  #   durabilityPerformanceOptimized: true
+  helm:
+    chartRepo: jhsu-helm-charts
+    chartName: cybersphere-ms
+  versionFileUpdates:
+    - type: yaml
+      file: _scm_helm/Chart.yaml
+      path: version
+    - type: yaml
+      file: _scm_helm/values.yaml
+      path: image.tag
+  assembleForPackage:
+    type: npm
+    enabled: false
+    credentialsId: jnj-eat-artifactory-build
+    dir: project
+    installCommand: npm ci
+    persistStash: true 
+## Version Calculation Stage 
+  versionCalculation:
+    enabled: true
+    type: gitversion
+## Unit test
+  unitTest:
+    enabled: false
+    type: npm
+    coverageReportFile: jest/coverage/lcov.info
+## Lint Test
+  lint:
+    enabled: false
+    type: npm
+## Static Analysis
+  staticAnalysis:
+    enabled: false
+    type: multi
+    stages:
+      sonar:
+        enabled: false
+        type: sonar
+        shortLivedAnalysis: false
+        longLivedAnalysis: false
+        shortLivedBuildResults:
+          BLOCKER:
+            FAILURE: 0
+          CRITICAL:
+            FAILURE: 50
+          IGNORE:
+            MAJOR: true
+            MINOR: true
+            INFO: true
+          QUALITY_GATE:
+            ERROR: FAILURE 
+            WARN: UNSTABLE        
+        longLivedBuildResults:
+          BLOCKER:
+            FAILURE: 0
+          CRITICAL:
+            FAILURE: 50
+          IGNORE:
+            MAJOR: true
+            MINOR: true
+            INFO: true
+          QUALITY_GATE:
+            ERROR: UNSTABLE 
+            WARN: SUCCESS
+## Package Stage
+  package:
+    enabled: false
+    type: multi
+    stages: 
+      Helm:
+        type: helm
+        enabled: false
+## Publish Stage
+  publish:
+    enabled: false
+    type: multi
+    stages:
+      Helm:
+        type: helm
+        chartRepoCredentialsId: artifactory
+      Docker:
+        type: docker
+        credsList:
+          - registry: https://jhsu-docker.artifactrepo.jnj.com
+            credentialsId: sourcecode-bitbucket
+          - registry: https://jnj.artifactrepo.jnj.com
+            credentialsId: jnj-eat-artifactory
+## Build Analysis
+  buildAnalysis:
+    enabled: false
+    xrayFailBuild: false
+## Build Announcements
+  buildAnnouncements:
+    enabled: false
+    destinations:
+      team-emails:
+        type: email
+        format: buildstate
+        recipients: [DL-RISE-Monitoring@its.jnj.com]
+        startEnabled: false
+        successEnabled: true
+        unstableEnabled: true
+        failureEnabled: true
+        jobTriggers: []
+## Deploy to Helm Chart on EKS
+  deploy:
+    enabled: false
+    type: helm
+    name: cybersphere-ms
+    createNamespace: true
+    chartRepoCredentialsId: sourcecode-bitbucket
+    atomic: false
+    ## EKS Configuration
+    kubernetesConfig:
+      type: eks
+      region: us-east-1
+      credentialsId: itx-eez-eatjenkinsadminapi
+## Resolve Artifacts
+  resolveArtifacts:
+    enabled: false
+## Pre-release
+  prerelease:
+    enabled: false
+## Release
+  release:
+    enabled: false
+
+## Environments
+environments:
+  PREDEV:
+    cmdb:
+      appid: APP000010043717
+      deploymentEnvironment: development
+    versionCalculation:
+      patternType: jnj-developer-branch
+    unitTest:
+      enabled: false
+    lint:
+      enabled: false
+    staticAnalysis:
+      enabled: false
+      type: multi
+      stages:
+        sonar:
+          enabled: true
+          type: sonar
+          shortLivedAnalysis: false
+          longLivedAnalysis: true
+    buildAnalysis:
+      enabled: false
+      xrayFailBuild: false
+    assembleForPackage:
+      enabled: false
+      command: npm run build
+    package:
+      enabled: true
+      type: multi
+      stages:
+        Helm:
+          enabled: true
+    publish:
+      enabled: true
+      stages:
+        Helm:
+          enabled: true
+        Docker:
+          enabled: true
+          tagStrategy: predev
+    deploy:
+      enabled: true
+      namespace: iasp-predev
+      atomic: false
+      configFiles:
+      - repoCredentialsId: "sourcecode-bitbucket"
+        files:
+          - file: _scm_config/predev.values.yaml
+            type: plaintext
+          # - file: _scm_config/common.values.yaml
+          #   type: plaintext
+      kubernetesConfig:
+        name: itx-eez-iasphere-test
+#### Dev Environment
+  DEV:
+    cmdb:
+      appid: APP000010043709
+      deploymentEnvironment: development
+    prerelease:
+      type: manual
+    release:
+      type: manual
+    versionCalculation:
+      patternType: jnj-dev-branch
+    unitTest:
+      enabled: false
+    lint:
+      enabled: false
+    staticAnalysis:
+      enabled: false
+      type: multi
+      stages:
+        sonar:
+          enabled: true
+          type: sonar
+          shortLivedAnalysis: false
+          longLivedAnalysis: true
+    buildAnalysis:
+      enabled: false
+      xrayFailBuild: false
+    assembleForPackage:
+      enabled: false
+      command: npm run build
+    package:
+      enabled: true
+      stages:
+        Helm:
+          enabled: true
+    publish:
+      enabled: true
+      stages:
+        Helm:
+          enabled: true
+        Docker:
+          enabled: true
+          tagStrategy: dev
+          prerelease:
+            tagStrategy: prerelease
+          release:
+            tagStrategy: release
+    deploy:
+      enabled: true
+      namespace: iasp-dev
+      atomic: false
+      configFiles:
+      - repoCredentialsId: "sourcecode-bitbucket"
+        files:
+          - file: _scm_config/dev.values.yaml
+            type: plaintext
+          # - file: _scm_config/common.values.yaml
+          #   type: plaintext
+      kubernetesConfig:
+        name: itx-eez-iasphere-development
+    archive:
+      enabled: false
+### QA Environment
+  QA:
+    cmdb:
+      appid: APP000010043718
+      deploymentEnvironment: qa
+    versionCalculation:
+      type: helm
+      confirmVersion: true
+      version: "^0-0"
+    resolveArtifacts:
+      enabled: true
+      type: helm
+    deploy:
+      enabled: false
+      atomic: true
+      namespace: iasp-qa
+      configFiles:
+      - repoCredentialsId: "sourcecode-bitbucket"
+        files:
+          - file: _scm_config/qa.values.yaml
+            type: plaintext
+          # - file: _scm_config/common.values.yaml
+          #   type: plaintext
+      kubernetesConfig:
+        name: itx-eez-iasphere-qa
+### Prod Environment
+  PROD:
+    cmdb:
+      appid: APP000010043719
+      deploymentEnvironment: production
+    versionCalculation:
+      type: helm
+      confirmVersion: true
+      version: "^0"
+    resolveArtifacts:
+      enabled: true
+      type: helm
+    deploy:
+      enabled: false
+      atomic: true
+      namespace: iasp-prod
+      configFiles:
+      - repoCredentialsId: "sourcecode-bitbucket"
+        files:
+          - file: _scm_config/prod.values.yaml
+            type: plaintext
+          # - file: _scm_config/common.values.yaml
+          #   type: plaintext
+      kubernetesConfig:
+        name: itx-eez-iasphere-production

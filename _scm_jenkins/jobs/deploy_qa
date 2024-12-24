@@ -1,0 +1,16 @@
+folder('cybersphere-logic')
+pipelineJob('cybersphere-logic/deploy-qa') {
+    definition {
+        cpsScm {
+          scm {
+            git {
+                branch('release')
+                remote {
+                    url('https://sourcecode.jnj.com/scm/asx-jhsu/cybersphere-ms.git')
+                    credentials('sourcecode-bitbucket')
+                }
+            }
+          }
+        }
+    }
+}
